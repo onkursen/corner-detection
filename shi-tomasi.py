@@ -1,50 +1,44 @@
 from util import *
 
 def shi_tomasi(src, maxCorners, qualityLevel, minDistance, blockSize=3, ksize=3, k=0.04):
-	top_corners = np.ndarray(shape=(maxCorners, 1, 2))
+	def shi_tomasi_score(M):
+		return min(np.linalg.eigvals(M))
+		# return min(M[0,0], M[1,1])
 
 	print "TRY: generating gradient matrix"
-	gradient_matrix = generate_gradient_matrix(src, blockSize, ksize, k)
+	gradient_matrix = generate_gradient_matrix(src, blockSize, ksize, k, shi_tomasi_score)
 	print "SUCCESS: generating gradient matrix"
 
+	t = time()
+
 	print "TRY: scoring corners"
-	good_corners = {}
+	good_corners = []
 	size_y, size_x = src.shape
 	for y in xrange(size_y):
 		for x in xrange(size_x):
-			M = gradient_matrix[(y, x)]
-			w, v = np.linalg.eig(M)
-			score = min(w)
-			if score >= qualityLevel:
-				good_corners[(y, x)] = score
+			if gradient_matrix[y, x] >= qualityLevel:
+				good_corners.append((y,x))
 	print "SUCCESS: scoring corners"
 	
-	print "TRY: obtaining best corners"
-	num_corners_obtained = 0
-	while num_corners_obtained < maxCorners and bool(good_corners):
-		best, score = max(good_corners.iteritems(), key=lambda k: k[1])
-		del good_corners[best]
-		top_corners[num_corners_obtained, 0] = best
-		num_corners_obtained += 1
+	print "TRY: picking best corners"
+	good_corners.sort(key=lambda k:-gradient_matrix[k])
+	top_corners = [good_corners.pop(0)]
+	for c in good_corners:
+		distance_curr = lambda corner: distance(c, corner)
+		if max(map(distance_curr, top_corners)) >= minDistance:
+			top_corners.append(c)
+		if len(top_corners) == maxCorners:
+			break
+	print "SUCCESS: picking best corners"
 
-		corners_to_remove = []
-		for c in good_corners:
-			if distance(best, c) < minDistance:
-				corners_to_remove.append(c)
-		for c in corners_to_remove:
-			del good_corners[c]
-	print "SUCCESS: obtaining best corners"
-
-	return top_corners[:num_corners_obtained]
+	print "Took: %.3f" % (time() - t)
+	return top_corners
 
 using_own_implementation = True
 corner_st = shi_tomasi if using_own_implementation else cv2.goodFeaturesToTrack
 
-img = cv2.imread('test_images/ansel.jpg')
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
-corners = corner_st(gray,25,0.01,10)
-corners = np.int0(corners)
+img, gray = read_image()
+corners = np.int0(corner_st(gray, 25, 0.01, 10))
 
 for i in corners:
     x,y = i.ravel()

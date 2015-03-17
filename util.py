@@ -6,12 +6,12 @@ import os
 import sys
 
 # Same argument set as cv2.cornerHarris
-def generate_gradient_matrix(src, blockSize, ksize, k):
+def generate_gradient_matrix(src, blockSize, ksize, k, score):
 	o = time()
 
 	size_y, size_x = src.shape
 	# Return value of the method
-	dst = {}
+	dst = np.zeros(src.shape)
 
 	# Use depth constants based on this StackOverflow article:
 	# http://stackoverflow.com/q/11331830/
@@ -21,10 +21,6 @@ def generate_gradient_matrix(src, blockSize, ksize, k):
 	gradient_xx = np.square(gradient_x)
 	gradient_yy = np.square(gradient_y)
 	gradient_xy = np.multiply(gradient_x, gradient_y)
-	print 'time so far: %.3f' % (time() - o)
-	print 'total iterations', size_y * size_x
-	raw_input("Continue?")
-	
 	for y in xrange(size_y):
 		oy = time()
 		for x in xrange(size_x):
@@ -44,8 +40,7 @@ def generate_gradient_matrix(src, blockSize, ksize, k):
 			M[1, 0] = M[0, 1]
 
 			# Calculate score as given in the paper
-			dst[(y, x)] = M
-		print 'Time for this iteration: %.3f' % (time() - oy)
+			dst[y, x] = score(M)
 			
 	print 'Total time: %.3f' % (time() - o)
 	return dst
@@ -54,3 +49,13 @@ def distance(p1, p2):
 	y, x = p1
 	v, u = p2
 	return ((y - v) ** 2 + (x - u) ** 2) ** 0.5
+
+def read_image():
+	filename = sys.argv[1]
+	if not os.path.isfile(filename):
+		print 'No such file:', filename
+		exit(1)
+
+	img = cv2.imread(filename)
+	gray = np.float32(cv2.cvtColor(img,cv2.COLOR_BGR2GRAY))
+	return img, gray
