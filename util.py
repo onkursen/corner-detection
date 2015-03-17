@@ -9,6 +9,7 @@ import sys
 def generate_gradient_matrix(src, blockSize, ksize, k):
 	o = time()
 
+	size_y, size_x = src.shape
 	# Return value of the method
 	dst = {}
 
@@ -16,23 +17,30 @@ def generate_gradient_matrix(src, blockSize, ksize, k):
 	# http://stackoverflow.com/q/11331830/
 	gradient_x = cv2.Sobel(src, cv2.CV_32F, 1, 0, ksize=ksize)
 	gradient_y = cv2.Sobel(src, cv2.CV_32F, 0, 1, ksize=ksize)
-
-	size_y, size_x = src.shape
+	
+	gradient_xx = np.square(gradient_x)
+	gradient_yy = np.square(gradient_y)
+	gradient_xy = np.multiply(gradient_x, gradient_y)
+	print 'time so far: %.3f' % (time() - o)
+	print 'total iterations', size_y * size_x
+	raw_input("Continue?")
+	
 	for y in xrange(size_y):
+		# oy = time()
 		for x in xrange(size_x):
 			M = np.zeros((2, 2))
 
 			# Use a blockSize x blockSize window (except for pixels too close to the edges)
 			for v in xrange(max(0, y - blockSize / 2), min(size_y, y + blockSize / 2)):
 				for u in xrange(max(0, x - blockSize / 2), min(size_x, x + blockSize / 2)):
-					cross_term = np.dot(gradient_x[v, u], gradient_y[v, u])
-					M[0, 0] += np.dot(gradient_x[v, u], gradient_x[v, u])
-					M[0, 1] += cross_term
-					M[1, 0] += cross_term
-					M[1, 1] += np.dot(gradient_y[v, u], gradient_y[v, u])
+					M[0, 0] += gradient_xx[v, u]
+					M[0, 1] += gradient_xy[v, u]
+					M[1, 1] += gradient_yy[v, u]
+			M[1, 0] = M[0, 1]
 
 			# Calculate score as given in the paper
 			dst[(y, x)] = M
+		# print 'Time for this iteration: %.3f' % (time() - oy)
 			
 	print 'Total time: %.3f' % (time() - o)
 	return dst
