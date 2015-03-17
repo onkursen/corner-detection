@@ -26,13 +26,18 @@ def generate_gradient_matrix(src, blockSize, ksize, k):
 	raw_input("Continue?")
 	
 	for y in xrange(size_y):
-		# oy = time()
+		oy = time()
 		for x in xrange(size_x):
 			M = np.zeros((2, 2))
 
 			# Use a blockSize x blockSize window (except for pixels too close to the edges)
-			for v in xrange(max(0, y - blockSize / 2), min(size_y, y + blockSize / 2)):
-				for u in xrange(max(0, x - blockSize / 2), min(size_x, x + blockSize / 2)):
+			ymin = max(0, y - blockSize / 2)
+			ymax = min(size_y, y + blockSize / 2)
+			xmin = max(0, x - blockSize / 2)
+			xmax = min(size_x, x + blockSize / 2)
+
+			for v in xrange(ymin, ymax):
+				for u in xrange(xmin, xmax):
 					M[0, 0] += gradient_xx[v, u]
 					M[0, 1] += gradient_xy[v, u]
 					M[1, 1] += gradient_yy[v, u]
@@ -40,7 +45,7 @@ def generate_gradient_matrix(src, blockSize, ksize, k):
 
 			# Calculate score as given in the paper
 			dst[(y, x)] = M
-		# print 'Time for this iteration: %.3f' % (time() - oy)
+		print 'Time for this iteration: %.3f' % (time() - oy)
 			
 	print 'Total time: %.3f' % (time() - o)
 	return dst
