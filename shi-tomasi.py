@@ -2,23 +2,23 @@ from util import *
 
 def shi_tomasi(src, maxCorners, qualityLevel, minDistance, blockSize=3, ksize=3, k=0.04):
 	def shi_tomasi_score(M):
-		return min(np.linalg.eigvals(M))
-		# return min(M[0,0], M[1,1])
+		# return min(np.linalg.eigvals(M))
+		return min(M[0,0], M[1,1])
 
-	print "TRY: generating gradient matrix"
+	print "TRY: generating gradient matrix and score"
 	gradient_matrix = generate_gradient_matrix(src, blockSize, ksize, k, shi_tomasi_score)
-	print "SUCCESS: generating gradient matrix"
+	print "SUCCESS: generating gradient matrix and score"
 
 	t = time()
 
-	print "TRY: scoring corners"
+	print "TRY: getting good corners"
 	good_corners = []
 	size_y, size_x = src.shape
 	for y in xrange(size_y):
 		for x in xrange(size_x):
 			if gradient_matrix[y, x] >= qualityLevel:
 				good_corners.append((y,x))
-	print "SUCCESS: scoring corners"
+	print "SUCCESS: getting good corners"
 	
 	print "TRY: picking best corners"
 	good_corners.sort(key=lambda k:-gradient_matrix[k])
@@ -31,7 +31,7 @@ def shi_tomasi(src, maxCorners, qualityLevel, minDistance, blockSize=3, ksize=3,
 			break
 	print "SUCCESS: picking best corners"
 
-	print "Took: %.3f" % (time() - t)
+	print "Time taken to pick corners: %.3f" % (time() - t)
 	return top_corners
 
 using_own_implementation = True

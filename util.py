@@ -42,7 +42,7 @@ def generate_gradient_matrix(src, blockSize, ksize, k, score):
 			# Calculate score as given in the paper
 			dst[y, x] = score(M)
 			
-	print 'Total time: %.3f' % (time() - o)
+	print 'Time taken to generate gradient matrix and score: %.3f' % (time() - o)
 	return dst
 
 def distance(p1, p2):
