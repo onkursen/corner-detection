@@ -29,7 +29,7 @@ def wait_until_done():
 
 # Same argument set as cv2.cornerHarris
 def generate_gradient_matrix(src, blockSize, ksize, k, score):
-  o = time()
+  start = time()
 
   print "TRY: generate gradient matrix and score"
   size_y, size_x = src.shape
@@ -65,7 +65,7 @@ def generate_gradient_matrix(src, blockSize, ksize, k, score):
       # Calculate score as given in the paper
       scored_image_gradient[y, x] = score(M)
 
-  print "SUCCESS (%.3f secs): generate gradient matrix and score" % (time() - o)
+  print "SUCCESS (%.3f secs): generate gradient matrix and score" % (time() - start)
   return scored_image_gradient
 
 def distance(p1, p2):

@@ -3,7 +3,10 @@
 Python + OpenCV implementations of corner detection algorithms:
 
 * Harris
-* Shi-Tomasi (coming soon!)
+* Shi-Tomasi
+
+This was done as part of a project for [CS231A at Stanford University
+in Winter 2015](http://cvgl.stanford.edu/teaching/cs231a_winter1415/).
 
 ### Sources for test images
 
